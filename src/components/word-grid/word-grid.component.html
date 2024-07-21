@@ -1,0 +1,27 @@
+<div
+    class="grid-container"
+    (mousemove)="onMouseMove($event)"
+>
+    <div
+        class="grid-row"
+        *ngFor="let row of grid"
+    >
+        <ng-container *ngFor="let cell of row">
+            <div
+                class="grid-cell"
+                [attr.id]="'g_' + cell?.id"
+                #element
+                *ngIf="!!cell; else empty"
+                (mousedown)="onMouseDown($event, cell, element)"
+                (mousemove)="onMouseMoveGrid($event, cell, element)"
+            >
+                <span *ngIf="!cell.mergedLabel" class="heading-1 text">{{cell.label}}</span>
+                <span *ngIf="cell.mergedLabel" class="heading-1 text">{{cell.mergedLabel}}</span>
+            </div>
+            <ng-template #empty>
+                <div class="grid-cell hidden"></div>
+            </ng-template>
+        </ng-container>
+
+    </div>
+</div>
