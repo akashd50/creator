@@ -35,22 +35,22 @@
             }
 
             &.right {
-                translate: 100%;
+                translate: 102%;
                 transition-duration: 0.3s;
             }
 
             &.up {
-                translate: 0 -100%;
+                translate: 0 -102%;
                 transition-duration: 0.3s;
             }
 
             &.down {
-                translate: 0 100%;
+                translate: 0 102%;
                 transition-duration: 0.3s;
             }
 
             &.left {
-                translate: -100%;
+                translate: -102%;
                 transition-duration: 0.3s;
             }
 

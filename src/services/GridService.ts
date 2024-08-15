@@ -10,7 +10,7 @@ import { Index2D } from "../types/index-2D";
 
 @Injectable({ providedIn: "root" })
 export class GridService {
-    private dimension = 10;
+    private dimension = 5;
     private gridItems: GridItem[][];
     private selectedSubject = new BehaviorSubject<GridItem>(undefined);
 
@@ -106,96 +106,95 @@ export class GridService {
         const dir = this.gridAnimationService.moveDir;
         switch (dir) {
             case Direction.Up:
-                for (let i = index.row; i <= this.grid[index.row].length - 1; i++) {
-
-                    if (i === this.grid[index.row].length - 1){
-                        this.grid[i][index.col] = this.getRandomCell(i, index.col);
-                        continue;
-                    }
-                    // if (this.grid[i + 1][index.col]) {
-                    //     this.gridAnimationService.applyClasses(document.querySelector(`#g_${this.grid[i + 1][index.col].id}`), Direction.Up)
-                    // }
-
-                    this.grid[i][index.col] = this.grid[i + 1][index.col];
-
-                    if (this.grid[i][index.col]) {
-                        this.grid[i][index.col].index.row = i;
-                    }
-                }
+                this.collapseHelper(index, Direction.Up);
                 break;
             case Direction.Down:
-                for (let i = index.row; i >= 0; i--) {
-
-                    if (i === 0){
-                        this.grid[i][index.col] = this.getRandomCell(i, index.col);
-                        continue;
-                    }
-
-                    // if (this.grid[i - 1][index.col]) {
-                    //     this.gridAnimationService.applyClasses(document.querySelector(`#g_${this.grid[i - 1][index.col].id}`), Direction.Down)
-                    // }
-
-                    this.grid[i][index.col] = this.grid[i - 1][index.col];
-
-                    if (this.grid[i][index.col]) {
-                        this.grid[i][index.col].index.row = i;
-                    }
-                }
+                this.collapseHelper(index, Direction.Down);
                 break;
             case Direction.Left:
-                for (let i = index.col; i <= this.grid[index.row].length - 1; i++) {
-                    if (i === this.grid[index.row].length - 1){
-                        this.grid[index.row][i] = this.getRandomCell(index.row, i);
-                        continue;
-                    }
-
-                    // if (this.grid[index.row][i + 1]) {
-                    //     this.gridAnimationService.applyClasses(document.querySelector(`#g_${this.grid[index.row][i + 1].id}`), Direction.Left)
-                    // }
-
-                    this.grid[index.row][i] = this.grid[index.row][i + 1];
-
-                    if (this.grid[index.row][i]) {
-                        this.grid[index.row][i].index.col = i;
-                    }
-                }
+                this.collapseHelper(index, Direction.Left);
                 break;
             case Direction.Right:
-                for (let i = index.col; i >= 0; i--) {
-                    if (i === 0){
-                        this.grid[index.row][i] = this.getRandomCell(index.row, i);
-                        continue;
-                    }
-
-                    // if (this.grid[index.row][i - 1]) {
-                    //     this.gridAnimationService.applyClasses(document.querySelector(`#g_${this.grid[index.row][i - 1].id}`), Direction.Right)
-                    // }
-
-                    this.grid[index.row][i] = this.grid[index.row][i - 1];
-                    if (this.grid[index.row][i]) {
-                        this.grid[index.row][i].index.col = i;
-                    }
-                }
+                this.collapseHelper(index, Direction.Right);
                 break;
         }
     }
 
-    /*private moveRow(start: number, end: number, index: Index2D, dir: Direction) {
-        for (let i = start; i <= end; i++) {
-            if (dir === Direction.Right) {
-                if (i === end){
-                    this.grid[index.row][i] = undefined;
-                    continue;
-                }
+    private collapseHelper(index: Index2D, dir: Direction) {
+        const points = this.getPointsToMove(index, dir);
+        this.applyClasses(points, dir);
+        setTimeout(() => {
+            this.applyClasses(points, undefined);
+            this.moveRow(points, dir, index);
+        }, 500);
+    }
 
-                const toMove = this.grid[index.row][i];
-                if (toMove) {
-                    toMove.index.col = i + 1;
-                    this.grid[index.row][i + 1] = this.grid[index.row][i];
-                }
+    private getPointsToMove(index: Index2D, dir: Direction) {
+        const points: Index2D[] = [];
+        switch (dir) {
+            case Direction.Right: {
+                const rightPoints = this.generatePoints(index.row, 0, index.row, index.col);
+                rightPoints.reverse();
+                return rightPoints;
+            }
+            case Direction.Left: {
+                return this.generatePoints(index.row, index.col + 1, index.row, this.dimension);
+            }
+            case Direction.Up: {
+                return this.generatePoints(index.row + 1, index.col, this.dimension, index.col);
+            }
+            case Direction.Down: {
+                const downPoints = this.generatePoints(0, index.col, index.row, index.col);
+                downPoints.reverse();
+                return downPoints;
             }
         }
-    }*/
+        return points;
+    }
+
+    private generatePoints(startRow: number, startCol: number, endRow: number, endCol: number): Index2D[] {
+        const list = [];
+        if (startCol === endCol) {
+            for (let i = startRow; i < endRow; i++) {
+                list.push(cloneDeep(this.grid[i][startCol].index));
+            }
+        } else if (startRow === endRow) {
+            for (let i = startCol; i < endCol; i++) {
+                list.push(cloneDeep(this.grid[startRow][i].index));
+            }
+        }
+        return list;
+    }
+
+    private moveRow(points: Index2D[], dir: Direction, index: Index2D) {
+        const colAdd = dir === Direction.Right ? 1 : dir === Direction.Left ? -1 : 0;
+        const rowAdd = dir === Direction.Down ? 1 : dir === Direction.Up ? -1 : 0;
+
+        for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+
+            const gridItem = this.grid[p.row][p.col];
+            this.grid[p.row + rowAdd][p.col + colAdd] = gridItem;
+            if (gridItem) {
+                gridItem.index.col = p.col + colAdd;
+                gridItem.index.row = p.row + rowAdd;
+            }
+
+            if (i === points.length - 1) {
+                this.grid[p.row][p.col] = this.getRandomCell(p.row, p.col);
+            }
+        }
+
+        if (points.length === 0) {
+            this.grid[index.row][index.col] = this.getRandomCell(index.row, index.col);
+        }
+    }
+
+    private applyClasses(points: Index2D[], dir: Direction) {
+        for (const point of points) {
+            this.gridAnimationService.applyClasses(document.querySelector(`#g_${this.grid[point.row][point.col].id}`), dir);
+        }
+    }
 
     private getRandomCell(i: number, j: number): GridItem {
         return {

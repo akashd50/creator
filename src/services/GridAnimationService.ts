@@ -86,6 +86,14 @@ export class GridAnimationService {
     }
 
     public applyClasses(htmlElement: HTMLElement, moveDir: Direction) {
+        if (moveDir === undefined) {
+            htmlElement.classList.add("moved");
+
+            setTimeout(() => {
+                htmlElement?.classList?.remove("moved");
+            }, 10);
+        }
+
         moveDir === Direction.Up ? htmlElement.classList.add("up") : htmlElement.classList.remove("up");
         moveDir === Direction.Right ? htmlElement.classList.add("right") : htmlElement.classList.remove("right");
         moveDir === Direction.Left ? htmlElement.classList.add("left") : htmlElement.classList.remove("left");

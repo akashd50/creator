@@ -39,6 +39,10 @@ export class WordGridComponent {
     onMouseMoveGrid(event: MouseEvent, cell: GridItem, element: HTMLElement) {
     }
 
+    trackById(index: number, item: GridItem) {
+        return item.id;
+    }
+
     @HostListener("mouseup")
     onMouseUp(event: MouseEvent) {
         this.gridService.onMouseUp();

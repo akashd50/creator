@@ -6,7 +6,7 @@
         class="grid-row"
         *ngFor="let row of grid"
     >
-        <ng-container *ngFor="let cell of row">
+        <ng-container *ngFor="let cell of row; trackBy: trackById">
             <div
                 class="grid-cell"
                 [attr.id]="'g_' + cell?.id"
