@@ -4,7 +4,7 @@
 >
     <div
         class="grid-row"
-        *ngFor="let row of grid"
+        *ngFor="let row of grid$ | async"
     >
         <ng-container *ngFor="let cell of row; trackBy: trackById">
             <div

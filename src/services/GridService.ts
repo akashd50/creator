@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { GridItem } from "../types/grid-item";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { OverlayRef } from "@angular/cdk/overlay";
 import { v4 as uuidv4 } from "uuid";
 import { cloneDeep } from "lodash";
@@ -11,19 +11,19 @@ import { Index2D } from "../types/index-2D";
 @Injectable({ providedIn: "root" })
 export class GridService {
     private dimension = 5;
-    private gridItems: GridItem[][];
+    private gridItemsSubject = new BehaviorSubject<GridItem[][]>([]);
     private selectedSubject = new BehaviorSubject<GridItem>(undefined);
-
+    private grid: GridItem[][];
     overlayRef: OverlayRef;
 
     constructor(
         private readonly gridAnimationService: GridAnimationService
     ) {
-        this.gridItems = [];
+        const gridItems = [];
 
         for (let i = 0; i < this.dimension; i++) {
             const newRow: GridItem[] = [];
-            this.gridItems[i] = newRow;
+            gridItems[i] = newRow;
 
             for (let j = 0; j < this.dimension; j++) {
                 newRow.push({
@@ -33,10 +33,12 @@ export class GridService {
                 });
             }
         }
+
+        this.gridItemsSubject.next(gridItems);
     }
 
-    get grid(): GridItem[][] {
-        return this.gridItems;
+    get grid$(): Observable<GridItem[][]> {
+        return this.gridItemsSubject.asObservable();
     }
 
     onMouseDown(cell: GridItem) {
@@ -57,6 +59,7 @@ export class GridService {
         }
 
         let toMergeWith;
+        this.grid = this.gridItemsSubject.value;
         const curr = this.selectedSubject.value;
 
         switch (this.gridAnimationService.moveDir) {
@@ -99,6 +102,8 @@ export class GridService {
         current.index.col = target.index.col;
         this.grid[target.index.row][target.index.col] = current;
 
+        this.gridItemsSubject.next(this.grid);
+
         this.collapse(currentIndexClone);
     }
 
@@ -126,7 +131,7 @@ export class GridService {
         setTimeout(() => {
             this.applyClasses(points, undefined);
             this.moveRow(points, dir, index);
-        }, 500);
+        }, 200);
     }
 
     private getPointsToMove(index: Index2D, dir: Direction) {
@@ -167,27 +172,30 @@ export class GridService {
     }
 
     private moveRow(points: Index2D[], dir: Direction, index: Index2D) {
+        const gridItems = cloneDeep(this.grid);
         const colAdd = dir === Direction.Right ? 1 : dir === Direction.Left ? -1 : 0;
         const rowAdd = dir === Direction.Down ? 1 : dir === Direction.Up ? -1 : 0;
 
         for (let i = 0; i < points.length; i++) {
             const p = points[i];
 
-            const gridItem = this.grid[p.row][p.col];
-            this.grid[p.row + rowAdd][p.col + colAdd] = gridItem;
+            const gridItem = gridItems[p.row][p.col];
+            gridItems[p.row + rowAdd][p.col + colAdd] = gridItem;
             if (gridItem) {
                 gridItem.index.col = p.col + colAdd;
                 gridItem.index.row = p.row + rowAdd;
             }
 
             if (i === points.length - 1) {
-                this.grid[p.row][p.col] = this.getRandomCell(p.row, p.col);
+                gridItems[p.row][p.col] = this.getRandomCell(p.row, p.col);
             }
         }
 
         if (points.length === 0) {
-            this.grid[index.row][index.col] = this.getRandomCell(index.row, index.col);
+            gridItems[index.row][index.col] = this.getRandomCell(index.row, index.col);
         }
+
+        this.gridItemsSubject.next(gridItems);
     }
 
     private applyClasses(points: Index2D[], dir: Direction) {

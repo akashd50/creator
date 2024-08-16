@@ -1,9 +1,10 @@
 import { Component, HostListener } from "@angular/core";
 import { GridItem } from "../../types/grid-item";
 import { GridService } from "../../services/GridService";
-import { NgForOf, NgIf } from "@angular/common";
+import { AsyncPipe, NgForOf, NgIf } from "@angular/common";
 import { CdkOverlayOrigin } from "@angular/cdk/overlay";
 import { GridAnimationService } from "../../services/GridAnimationService";
+import { Observable } from "rxjs";
 
 @Component({
   selector: 'word-grid',
@@ -11,19 +12,20 @@ import { GridAnimationService } from "../../services/GridAnimationService";
     imports: [
         NgForOf,
         CdkOverlayOrigin,
-        NgIf
+        NgIf,
+        AsyncPipe
     ],
   templateUrl: './word-grid.component.html',
   styleUrl: './word-grid.component.scss'
 })
 export class WordGridComponent {
-    grid: GridItem[][];
+    grid$: Observable<GridItem[][]>;
 
     constructor(
         private readonly gridService: GridService,
         private readonly gridAnimationService: GridAnimationService
     ) {
-        this.grid = gridService.grid;
+        this.grid$ = gridService.grid$;
     }
 
     onMouseDown(event: MouseEvent, cell: GridItem, element: HTMLElement) {
@@ -46,6 +48,9 @@ export class WordGridComponent {
     @HostListener("mouseup")
     onMouseUp(event: MouseEvent) {
         this.gridService.onMouseUp();
-        this.gridAnimationService.onMouseUp(event);
+
+        setTimeout(() => {
+            this.gridAnimationService.onMouseUp(event);
+        }, 200);
     }
 }
