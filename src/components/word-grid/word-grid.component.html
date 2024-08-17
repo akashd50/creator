@@ -15,8 +15,9 @@
                 (mousedown)="onMouseDown($event, cell, element)"
                 (mousemove)="onMouseMoveGrid($event, cell, element)"
             >
-                <span *ngIf="!cell.mergedLabel" class="heading-1 text">{{cell.label}}</span>
-                <span *ngIf="cell.mergedLabel" class="heading-1 text">{{cell.mergedLabel}}</span>
+                <img class="image-icon" [src]="'assets/icons/' + cell.icon" alt=""/>
+                <span *ngIf="!cell.mergedLabel" class="body-1 overlay-text">{{cell.label}}</span>
+                <span *ngIf="cell.mergedLabel" class="body-1 overlay-text">{{cell.mergedLabel}}</span>
             </div>
             <ng-template #empty>
                 <div class="grid-cell hidden"></div>

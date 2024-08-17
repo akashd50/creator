@@ -1,10 +1,11 @@
 import { Component, HostListener } from "@angular/core";
 import { GridItem } from "../../types/grid-item";
 import { GridService } from "../../services/GridService";
-import { AsyncPipe, NgForOf, NgIf } from "@angular/common";
+import { AsyncPipe, NgForOf, NgIf, NgOptimizedImage } from "@angular/common";
 import { CdkOverlayOrigin } from "@angular/cdk/overlay";
 import { GridAnimationService } from "../../services/GridAnimationService";
 import { Observable } from "rxjs";
+import { MatTooltip } from "@angular/material/tooltip";
 
 @Component({
   selector: 'word-grid',
@@ -13,7 +14,9 @@ import { Observable } from "rxjs";
         NgForOf,
         CdkOverlayOrigin,
         NgIf,
-        AsyncPipe
+        AsyncPipe,
+        NgOptimizedImage,
+        MatTooltip
     ],
   templateUrl: './word-grid.component.html',
   styleUrl: './word-grid.component.scss'
@@ -21,6 +24,11 @@ import { Observable } from "rxjs";
 export class WordGridComponent {
     grid$: Observable<GridItem[][]>;
 
+    /*
+    * [matTooltip]="cell.mergedLabel ?? cell.label"
+    * [matTooltipPosition]="'above'"
+    * matTooltipPositionAtOrigin="true"
+    */
     constructor(
         private readonly gridService: GridService,
         private readonly gridAnimationService: GridAnimationService

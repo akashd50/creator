@@ -7,6 +7,7 @@ import { cloneDeep } from "lodash";
 import { GridAnimationService } from "./GridAnimationService";
 import { Direction } from "../types/direction";
 import { Index2D } from "../types/index-2D";
+import { GridContentUtils } from "./GridContentService";
 
 @Injectable({ providedIn: "root" })
 export class GridService {
@@ -19,22 +20,7 @@ export class GridService {
     constructor(
         private readonly gridAnimationService: GridAnimationService
     ) {
-        const gridItems = [];
-
-        for (let i = 0; i < this.dimension; i++) {
-            const newRow: GridItem[] = [];
-            gridItems[i] = newRow;
-
-            for (let j = 0; j < this.dimension; j++) {
-                newRow.push({
-                    id: uuidv4(),
-                    label: this.getRandomCharacter(),
-                    index: { row: i, col: j }
-                });
-            }
-        }
-
-        this.gridItemsSubject.next(gridItems);
+        this.gridItemsSubject.next(GridContentUtils.getInitialGrid(this.dimension));
     }
 
     get grid$(): Observable<GridItem[][]> {
@@ -81,14 +67,19 @@ export class GridService {
 
         if (toMergeWith) {
             if (dryRun) {
-                curr.mergedLabel = `${curr.label}${toMergeWith.label}`;
+                curr.mergedLabel = GridContentUtils.getMergedLabel(curr, toMergeWith);
+                curr.mergedIcon = GridContentUtils.getMergedIcon(curr, toMergeWith);
             } else {
-                curr.label = `${curr.label}${toMergeWith.label}`;
+                curr.itemType = GridContentUtils.getMergedItem(curr, toMergeWith);
+                curr.label = GridContentUtils.getMergedLabel(curr, toMergeWith);
+                curr.icon = GridContentUtils.getMergedIcon(curr, toMergeWith);
                 curr.mergedLabel = undefined;
+                curr.mergedIcon = undefined;
                 this.replaceTile(curr, toMergeWith);
             }
         } else {
             curr.mergedLabel = undefined;
+            curr.mergedIcon = undefined;
         }
     }
 
@@ -187,12 +178,12 @@ export class GridService {
             }
 
             if (i === points.length - 1) {
-                gridItems[p.row][p.col] = this.getRandomCell(p.row, p.col);
+                gridItems[p.row][p.col] = GridContentUtils.getRandomGridItem(p.row, p.col);
             }
         }
 
         if (points.length === 0) {
-            gridItems[index.row][index.col] = this.getRandomCell(index.row, index.col);
+            gridItems[index.row][index.col] = GridContentUtils.getRandomGridItem(index.row, index.col);
         }
 
         this.gridItemsSubject.next(gridItems);
@@ -204,15 +195,4 @@ export class GridService {
         }
     }
 
-    private getRandomCell(i: number, j: number): GridItem {
-        return {
-            id: uuidv4(),
-            label: this.getRandomCharacter(),
-            index: { row: i, col: j }
-        };
-    }
-
-    private getRandomCharacter(): string {
-        return String.fromCharCode(65 + Math.floor(Math.random() * 26));
-    }
 }

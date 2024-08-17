@@ -6,6 +6,7 @@
     --theme-surface-light: #696969;
     --theme-surface-focused: #474747;
     --theme-surface-raised: #9e9e9e;
+    --theme-text-high: #ffffee;
 
     font-family: "Candara";
     background: var(--theme-surface);
@@ -14,4 +15,16 @@
         font-weight: bold;
         font-size: x-large;
     }
+
+    .body-1 {
+        font-weight: normal;
+        font-size: 1.0rem;
+    }
+}
+
+.mat-mdc-tooltip {
+    background-color: var(--theme-surface-raised);
+    font-size: 0.75rem;
+    border-radius: 8px;
+    color: var(--theme-text-high);
 }

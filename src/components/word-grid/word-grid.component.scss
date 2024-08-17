@@ -11,10 +11,11 @@
         margin: 2px 0 2px 0;
 
         .grid-cell {
+            position: relative;
             display: flex;
             flex-wrap: wrap;
-            max-width: 9vh;
-            max-height: 9vh;
+            max-width: 12vh;
+            max-height: 12vh;
             flex: 1 1 auto;
             align-content: center;
             justify-content: center;
@@ -27,6 +28,12 @@
             z-index: 0;
             aspect-ratio: 1;
             width: 100%;
+
+            .image-icon {
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+            }
 
             &.selected {
                 scale: 1.2 1.2;
@@ -64,6 +71,18 @@
                 overflow: hidden;
                 padding: 8px;
             }
+
+            .overlay-text {
+                width: 100%;
+                background-color: #69696930;
+                padding: 8px;
+                position: absolute;
+                box-sizing: border-box;
+                text-align: center;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
         }
 
         .hidden {
@@ -74,6 +93,8 @@
             margin-right: 0;
         }
     }
+}
 
-
+.tooltip-class {
+    background-color: var(--theme-surface-raised);
 }
